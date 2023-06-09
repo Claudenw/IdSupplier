@@ -124,12 +124,18 @@ public class ShortSupplier {
         Set<Short> set = new HashSet<>();
         int collisionCount = 0;
         ShortSupplier ss = new ShortSupplier();
+        if (!ss.atStart()) {
+            System.err.println( "Not at start");
+        }
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < FILLER_LIMIT; i++) {
                 Short s = ss.nextId();
                 if (!set.add(s)) {
                     System.err.println("Collision at " + i + " value " + s);
                     collisionCount++;
+                }
+                if (ss.atStart() && i != FILLER_LIMIT-1) {
+                    System.err.println( "At start");
                 }
             }
             System.out.println(collisionCount + " Collisions");
@@ -139,6 +145,9 @@ public class ShortSupplier {
         // test partial
         System.out.println( "Starting partial test");
         ss = new ShortSupplier( 0x0F, 0x5F );
+        if (!ss.atStart()) {
+            System.err.println( "Not at start");
+        }
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < ss.buffer.length; i++) {
                 Short s = ss.nextId();
@@ -148,6 +157,9 @@ public class ShortSupplier {
                 if (!set.add(s)) {
                     System.err.println("Collision at " + i + " value " + s);
                     collisionCount++;
+                }
+                if (ss.atStart() && i != ss.buffer.length-1) {
+                    System.err.println( "At start");
                 }
             }
             System.out.println(collisionCount + " Collisions");
