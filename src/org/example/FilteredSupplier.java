@@ -9,7 +9,7 @@ import org.example.stable_bloom.StableBloomFilter;
 public class FilteredSupplier {
     private StableBloomFilter stableBloomFilter;
     private ShortSupplier shortSupplier;
-    private static Set<Short> set = new HashSet<>();
+
     
     public FilteredSupplier() {
         stableBloomFilter = new StableBloomFilter(StableBloomFilter.StableShape.byMaxElements(IDHasherFactory.LIMIT));
@@ -32,6 +32,7 @@ public class FilteredSupplier {
     }
 
     public static void main(String[] args) {
+        Set<Short> set = new HashSet<>();
         int collisionCount = 0;
         FilteredSupplier supplier = new FilteredSupplier();
         for (int j = 0; j < 3; j++) {
