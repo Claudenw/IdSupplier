@@ -8,6 +8,9 @@ public class StableShape {
     public final int resetValue;
     public final int maxElements;
     public final int numberOfCellsDecremented;
+    public final byte bitsPerEntry;
+    public final byte entriesPerByte;
+    
 
     public static StableShape byMaxElements(int maxElements) {
         return withResetValue(maxElements, 2);
@@ -34,6 +37,17 @@ public class StableShape {
         this.resetValue = resetValue;
         this.maxElements = maxElements;
         this.numberOfCellsDecremented = numberOfCellsDecremented;
+        
+        int bits = Byte.SIZE;
+        for (int i=1;i<Byte.SIZE;i++) {
+            if ((resetValue >> i)==0)
+            {
+                bits = i;
+                break;
+            }
+        }
+        this.bitsPerEntry = (byte) bits;
+        this.entriesPerByte = (byte) (Byte.SIZE / bitsPerEntry);
     }
 
     public Shape getShape() {
@@ -66,14 +80,5 @@ public class StableShape {
     public int expectedCardinality() {
         return (int) Math.ceil((1.0 - stablePoint()) * shape.getNumberOfBits());
     }
-    
-    public byte bitsPerEntry() {
-        for (int i=1;i<Byte.SIZE;i++) {
-            if ((resetValue >> i)==0)
-            {
-                return (byte)i;
-            }
-        }
-        return Byte.SIZE;
-    }
+
 }

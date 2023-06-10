@@ -12,8 +12,8 @@ public abstract class AbstractBufferManager implements BufferManager {
     protected final byte[] buffer;
 
     public static BufferManager instance(StableShape shape) {
-        byte entriesPerByte = (byte) (Byte.SIZE / shape.bitsPerEntry());
-        return (entriesPerByte == 1) ? new Simple(shape) : new Packed(shape, entriesPerByte);
+        byte entriesPerByte = (byte) (Byte.SIZE / shape.bitsPerEntry);
+        return (entriesPerByte == 1) ? new Simple(shape) : new Packed(shape);
     }
 
     private AbstractBufferManager(StableShape shape, int buffSize) {
@@ -77,15 +77,10 @@ public abstract class AbstractBufferManager implements BufferManager {
         private static final byte OFFSET = 1;
 
         private final byte mask;
-        private final byte bitsPerEntry;
-        private final byte entriesPerByte;
 
-        Packed(StableShape shape, byte entriesPerByte) {
-            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ entriesPerByte ));
-            double i = shape.getNumberOfEntries() * 1.0/ entriesPerByte ;
-            this.bitsPerEntry = shape.bitsPerEntry();
-            this.entriesPerByte = entriesPerByte;
-            this.mask = (byte) ((1 << bitsPerEntry) - 1);
+        Packed(StableShape shape) {
+            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ shape.entriesPerByte ));
+            this.mask = (byte) ((1 << shape.bitsPerEntry) - 1);
         }
         
         /**
@@ -95,7 +90,7 @@ public abstract class AbstractBufferManager implements BufferManager {
          * @return int[] of position and offset
          */
         private int[] location(int entry) {
-            return new int[] { entry / entriesPerByte, BitMap.mod(entry, entriesPerByte) * bitsPerEntry };
+            return new int[] { entry / shape.entriesPerByte, BitMap.mod(entry, shape.entriesPerByte) * shape.bitsPerEntry };
         }
 
         private int get(int[] location) {

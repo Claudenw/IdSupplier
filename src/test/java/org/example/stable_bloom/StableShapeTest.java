@@ -44,15 +44,15 @@ public class StableShapeTest {
     
     @Test
     public void bitsPerEntryTest() {
-        assertEquals( 2, StableShape.byMaxElements(5).bitsPerEntry());
-        assertEquals( 2, StableShape.withResetValue(5,3).bitsPerEntry());
-        assertEquals( 3, StableShape.withResetValue(5,4).bitsPerEntry());
-        assertEquals( 3, StableShape.withResetValue(5,5).bitsPerEntry());
-        assertEquals( 3, StableShape.withResetValue(5,6).bitsPerEntry());
-        assertEquals( 3, StableShape.withResetValue(5,7).bitsPerEntry());
-        assertEquals( 4, StableShape.withResetValue(5,8).bitsPerEntry());
-        assertEquals( 8, StableShape.withResetValue(5,129).bitsPerEntry());
-        assertEquals( 8, StableShape.withResetValue(5,255).bitsPerEntry());
+        assertEquals( 2, StableShape.byMaxElements(5).bitsPerEntry);
+        assertEquals( 2, StableShape.withResetValue(5,3).bitsPerEntry);
+        assertEquals( 3, StableShape.withResetValue(5,4).bitsPerEntry);
+        assertEquals( 3, StableShape.withResetValue(5,5).bitsPerEntry);
+        assertEquals( 3, StableShape.withResetValue(5,6).bitsPerEntry);
+        assertEquals( 3, StableShape.withResetValue(5,7).bitsPerEntry);
+        assertEquals( 4, StableShape.withResetValue(5,8).bitsPerEntry);
+        assertEquals( 8, StableShape.withResetValue(5,129).bitsPerEntry);
+        assertEquals( 8, StableShape.withResetValue(5,255).bitsPerEntry);
     }
     
     @Test
