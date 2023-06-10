@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.example.stable_bloom.StableBloomFilter;
+import org.example.stable_bloom.StableShape;
 
 public class FilteredSupplier {
     private StableBloomFilter stableBloomFilter;
@@ -12,7 +13,7 @@ public class FilteredSupplier {
 
     
     public FilteredSupplier() {
-        stableBloomFilter = new StableBloomFilter(StableBloomFilter.StableShape.byMaxElements(IDHasherFactory.LIMIT));
+        stableBloomFilter = new StableBloomFilter(StableShape.byMaxElements(IDHasherFactory.LIMIT));
         shortSupplier = new ShortSupplier();
     }
     
