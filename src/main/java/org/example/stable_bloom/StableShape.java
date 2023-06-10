@@ -3,6 +3,7 @@ package org.example.stable_bloom;
 import org.apache.commons.collections4.bloomfilter.Shape;
 
 public class StableShape {
+    
     private Shape shape;
     public final int resetValue;
     public final int maxElements;
@@ -67,6 +68,12 @@ public class StableShape {
     }
     
     public byte bitsPerEntry() {
-        return (byte) Math.ceil(Math.sqrt(resetValue));
+        for (int i=1;i<Byte.SIZE;i++) {
+            if ((resetValue >> i)==0)
+            {
+                return (byte)i;
+            }
+        }
+        return Byte.SIZE;
     }
 }

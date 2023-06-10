@@ -2,7 +2,7 @@ package org.example.stable_bloom;
 
 import java.util.Random;
 
-import org.apache.commons.collections4.bloomfilter.EnhancedDoubleHasher;
+import org.apache.commons.collections4.bloomfilter.BitMap;
 
 /**
  * Generate sudo random integers using combinatorial hashing as described by
@@ -29,7 +29,7 @@ public class FastPseudoRandomInt {
      * @return a pseudo random integer.
      */
     public int nextInt(int limit) {
-        int idx = EnhancedDoubleHasher.mod(index, limit);
+        int idx = BitMap.mod(index, limit);
         // Update index and handle wrapping
         index -= increment;
 

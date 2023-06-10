@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.IntBinaryOperator;
 
 import org.apache.commons.collections4.bloomfilter.BitCountProducer.BitCountConsumer;
-import org.apache.commons.collections4.bloomfilter.EnhancedDoubleHasher;
+import org.apache.commons.collections4.bloomfilter.BitMap;
 
 public abstract class AbstractBufferManager implements BufferManager {
 
@@ -41,7 +41,7 @@ public abstract class AbstractBufferManager implements BufferManager {
     public static class Simple extends AbstractBufferManager {
 
         Simple(StableShape shape) {
-            super(shape, shape.maxElements);
+            super(shape, shape.getNumberOfEntries());
         }
         
         @Override
@@ -56,7 +56,7 @@ public abstract class AbstractBufferManager implements BufferManager {
 
         @Override
         public void decrement(int entry) {
-            if (buffer[entry] > 0) {
+            if (buffer[entry] != 0) {
                 buffer[entry] = asByte(asInt(buffer[entry]) - 1);
             }
         }
@@ -81,7 +81,8 @@ public abstract class AbstractBufferManager implements BufferManager {
         private final byte entriesPerByte;
 
         Packed(StableShape shape, byte entriesPerByte) {
-            super(shape, (int) Math.ceil(shape.bitsPerEntry() * shape.getNumberOfEntries() * 1.0 / Byte.SIZE));
+            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ entriesPerByte ));
+            double i = shape.getNumberOfEntries() * 1.0/ entriesPerByte ;
             this.bitsPerEntry = shape.bitsPerEntry();
             this.entriesPerByte = entriesPerByte;
             this.mask = (byte) ((1 << bitsPerEntry) - 1);
@@ -94,11 +95,11 @@ public abstract class AbstractBufferManager implements BufferManager {
          * @return int[] of position and offset
          */
         private int[] location(int entry) {
-            return new int[] { entry / entriesPerByte, EnhancedDoubleHasher.mod(entry, entriesPerByte) * bitsPerEntry };
+            return new int[] { entry / entriesPerByte, BitMap.mod(entry, entriesPerByte) * bitsPerEntry };
         }
 
         private int get(int[] location) {
-            return asInt((mask << location[OFFSET]) & buffer[location[POSITION]]);
+            return asInt(((mask << location[OFFSET]) & buffer[location[POSITION]]) >> location[OFFSET]);
         }
         
         @Override
