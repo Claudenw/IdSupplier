@@ -12,7 +12,7 @@ public abstract class AbstractBufferManager implements BufferManager {
     protected final byte[] buffer;
 
     public static BufferManager instance(StableShape shape) {
-        byte entriesPerByte = (byte) (Byte.SIZE / shape.bitsPerEntry);
+        byte entriesPerByte = (byte) (Byte.SIZE / shape.bitsPerCell);
         return (entriesPerByte == 1) ? new Simple(shape) : new Packed(shape);
     }
 
@@ -42,6 +42,12 @@ public abstract class AbstractBufferManager implements BufferManager {
 
         Simple(StableShape shape) {
             super(shape, shape.getNumberOfEntries());
+        }
+        
+        public Simple copy() {
+            Simple result = new Simple(this.shape);
+            System.arraycopy(this.buffer, 0, result.buffer, 0, result.buffer.length);
+            return result;
         }
         
         @Override
@@ -79,8 +85,14 @@ public abstract class AbstractBufferManager implements BufferManager {
         private final byte mask;
 
         Packed(StableShape shape) {
-            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ shape.entriesPerByte ));
-            this.mask = (byte) ((1 << shape.bitsPerEntry) - 1);
+            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ shape.cellsPerByte ));
+            this.mask = (byte) ((1 << shape.bitsPerCell) - 1);
+        }
+        
+        public Packed copy() {
+            Packed result = new Packed(this.shape);
+            System.arraycopy(this.buffer, 0, result.buffer, 0, result.buffer.length);
+            return result;
         }
         
         /**
@@ -90,7 +102,7 @@ public abstract class AbstractBufferManager implements BufferManager {
          * @return int[] of position and offset
          */
         private int[] location(int entry) {
-            return new int[] { entry / shape.entriesPerByte, BitMap.mod(entry, shape.entriesPerByte) * shape.bitsPerEntry };
+            return new int[] { entry / shape.cellsPerByte, BitMap.mod(entry, shape.cellsPerByte) * shape.bitsPerCell };
         }
 
         private int get(int[] location) {

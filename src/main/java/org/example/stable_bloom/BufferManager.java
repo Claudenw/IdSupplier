@@ -15,4 +15,6 @@ public interface BufferManager {
     void clear();
     
     void func(int entry, int value, IntBinaryOperator f);
+    
+    BufferManager copy();
 }

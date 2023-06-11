@@ -1,27 +1,38 @@
 package org.example.stable_bloom;
 
 import java.util.Objects;
+import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
 
 import org.apache.commons.collections4.bloomfilter.BitCountProducer;
 import org.apache.commons.collections4.bloomfilter.BitMap;
+import org.apache.commons.collections4.bloomfilter.BitMapProducer;
+import org.apache.commons.collections4.bloomfilter.BloomFilter;
 import org.apache.commons.collections4.bloomfilter.CountingBloomFilter;
+import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.IndexProducer;
 import org.apache.commons.collections4.bloomfilter.Shape;
+import org.apache.commons.collections4.bloomfilter.SimpleBloomFilter;
 
 /**
  * Based http://webdocs.cs.ualberta.ca/~drafiei/papers/DupDet06Sigmod.pdf
  *
  */
-public class StableBloomFilter implements CountingBloomFilter {
+public class StableBloomFilter implements BloomFilter {
     private final StableShape shape;
     private final FastPseudoRandomInt idxFactory;
     private final BufferManager buffer;
+    private int cardinality;
 
     public StableBloomFilter(StableShape shape) {
+        this(shape, AbstractBufferManager.instance(shape));
+    }
+
+    private StableBloomFilter(StableShape shape, BufferManager buffer) {
         this.shape = shape;
         this.idxFactory = new FastPseudoRandomInt();
-        this.buffer = AbstractBufferManager.instance(shape);
+        this.buffer = buffer;
+        this.cardinality = -1;
     }
 
     public StableShape getStableShape() {
@@ -41,39 +52,59 @@ public class StableBloomFilter implements CountingBloomFilter {
     @Override
     public void clear() {
         buffer.clear();
+        cardinality = 0;
     }
 
     @Override
     public boolean contains(IndexProducer indexProducer) {
-        boolean[] duplicateFlag = { false };
-        indexProducer.forEachIndex(x -> {
-            duplicateFlag[0] |= (x == 0);
-            return true;
+        return indexProducer.forEachIndex(x -> {
+            return buffer.isSet(x);
         });
-        return duplicateFlag[0];
     }
 
     @Override
     public int cardinality() {
-        int result = 0;
-        for (int i = 0; i < shape.getNumberOfEntries(); i++) {
-            if (buffer.isSet(i)) {
-                result++;
+        if (cardinality < 0) {
+            int result = 0;
+            for (int i = 0; i < shape.getNumberOfEntries(); i++) {
+                if (buffer.isSet(i)) {
+                    result++;
+                }
             }
+            cardinality = result;
         }
-        return result;
+        return cardinality;
     }
 
     @Override
     public boolean merge(final IndexProducer indexProducer) {
+        Objects.requireNonNull(indexProducer, "indexProducer");
         decrement();
         return indexProducer.forEachIndex(x -> {
-            if (x > shape.getNumberOfEntries()) {
-                return false;
+            if (x >= shape.getNumberOfEntries() || x < 0) {
+                throw new IllegalArgumentException(
+                        String.format("Filter only accepts values in the [0,%d) range", getShape().getNumberOfBits()));
             }
             buffer.set(x);
             return true;
         });
+    }
+
+    @Override
+    public boolean merge(final BitMapProducer bitMapProducer) {
+        Objects.requireNonNull(bitMapProducer, "bitMapProducer");
+        return this.merge(IndexProducer.fromBitMapProducer(bitMapProducer));
+    }
+
+    @Override
+    public boolean merge(final BloomFilter other) {
+        return merge((IndexProducer) other);
+    }
+
+    @Override
+    public boolean merge(final Hasher hasher) {
+        Objects.requireNonNull(hasher, "hasher");
+        return merge(hasher.uniqueIndices(getShape()));
     }
 
     @Override
@@ -103,62 +134,32 @@ public class StableBloomFilter implements CountingBloomFilter {
             }
         }
         return consumer.test(value);
-
     }
 
     @Override
-    public boolean forEachCount(BitCountConsumer consumer) {
+    public boolean forEachIndex(final IntPredicate consumer) {
+        Objects.requireNonNull(consumer, "consumer");
         for (int i = 0; i < shape.getNumberOfEntries(); i++) {
-            int b = buffer.get(i);
-            if (b != 0) {
-                if (consumer.test(i, b)) {
-                    return false;
-                }
+            if (buffer.isSet(i) && !consumer.test(i)) {
+                return false;
             }
         }
         return true;
     }
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
-    public boolean add(BitCountProducer other) {
-        return other.forEachCount((x, y) -> {
-            if (x > shape.getNumberOfEntries()) {
-                return false;
-            }
-            buffer.func(x, y, (x1, y1) -> x1 + y1);
-            return true;
-        });
-    }
-
-    @Override
-    public boolean subtract(BitCountProducer other) {
-        return other.forEachCount((x, y) -> {
-            if (x > shape.getNumberOfEntries()) {
-                return false;
-            }
-            buffer.func(x, y, (x1, y1) -> x1 - y1);
-            return true;
-        });
-    }
-
-    @Override
-    public CountingBloomFilter copy() {
-        StableBloomFilter result = new StableBloomFilter(this.shape);
-        forEachCount((x, y) -> {
-            result.buffer.func(x, y, (x1, y1) -> y1);
-            return true;
-        });
-        return result;
+    public BloomFilter copy() {
+        BloomFilter bf = new SimpleBloomFilter(this.shape.getShape());
+        bf.merge(this);
+        // return new StableBloomFilter(this.shape, this.buffer.copy());
+        return bf;
     }
 
     private void decrement() {
-        for (int i = 0; i < shape.numberOfCellsDecremented; i++) {
-            buffer.decrement(idxFactory.nextInt(shape.getNumberOfEntries()));
-        }
+        cardinality = -1;
+        idxFactory.uniqueIndices(shape.decrementShape).forEachIndex(x -> {
+            buffer.decrement(x);
+            return true;
+        });
     }
 }

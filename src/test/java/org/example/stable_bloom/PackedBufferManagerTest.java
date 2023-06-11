@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.commons.collections4.bloomfilter.Shape;
 import org.junit.jupiter.api.Test;
 
 public class PackedBufferManagerTest {
@@ -12,17 +13,18 @@ public class PackedBufferManagerTest {
     private AbstractBufferManager underTest;
     private int evenReset = 2;  // 2 bits
     private int oddReset = 4;   // 3 bits
+    private Shape testShape = Shape.fromNP(5, 1.0/5);
     
     @Test
     public void lengthTest() {
-        StableShape shape = StableShape.withResetValue(5, evenReset);
+        StableShape shape = StableShape.withResetValue(testShape, evenReset);
         underTest = new AbstractBufferManager.Packed(shape);
         assertEquals( 5, underTest.buffer.length);
         
         underTest = (AbstractBufferManager) AbstractBufferManager.instance(shape);
         assertEquals( 5, underTest.buffer.length);
         
-        shape = StableShape.withResetValue(5, oddReset);
+        shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         assertEquals( 9, underTest.buffer.length);
         
@@ -32,14 +34,14 @@ public class PackedBufferManagerTest {
     
     @Test
     public void clearTest() {
-        StableShape shape = StableShape.withResetValue(5, evenReset);
+        StableShape shape = StableShape.withResetValue(testShape, evenReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.buffer[0]=(byte)0xCC;
         underTest.buffer[1]=(byte)0xFF;
         underTest.clear();
         assertThat( underTest.buffer ).containsOnly( 0 );
         
-        shape = StableShape.withResetValue(5, oddReset);
+        shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.buffer[0]=(byte)0xCC;
         underTest.buffer[1]=(byte)0xFF;
@@ -50,7 +52,7 @@ public class PackedBufferManagerTest {
 
     @Test
     public void decrementEvenTest() {
-        StableShape shape = StableShape.withResetValue(5, evenReset);
+        StableShape shape = StableShape.withResetValue(testShape, evenReset);
         underTest = new AbstractBufferManager.Packed(shape);
             underTest.buffer[0]=(byte)0xFF;
             underTest.buffer[1]=(byte)5;
@@ -82,7 +84,7 @@ public class PackedBufferManagerTest {
 
     @Test
     public void decrementOddTest() {
-        StableShape shape = StableShape.withResetValue(5, oddReset);
+        StableShape shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
             underTest.buffer[0]=(byte)0xFF;
             underTest.buffer[1]=(byte)5;
@@ -138,7 +140,7 @@ public class PackedBufferManagerTest {
     
     @Test
     public void funcTest() {
-        StableShape shape = StableShape.withResetValue(5, oddReset);
+        StableShape shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.func(0, 1, (x,y) -> x+y);
         assertEquals( 1, underTest.buffer[0] );
@@ -148,7 +150,7 @@ public class PackedBufferManagerTest {
     
     @Test
     public void getTest() {
-        StableShape shape = StableShape.withResetValue(5, oddReset);
+        StableShape shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.buffer[0]=(byte)0x1C;
         underTest.buffer[1]=(byte)5;
@@ -159,7 +161,7 @@ public class PackedBufferManagerTest {
     
     @Test
     public void isSetTest() {
-        StableShape shape = StableShape.withResetValue(5, oddReset);
+        StableShape shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.buffer[0]=(byte)0xC5;
         underTest.buffer[1]=(byte)5;
@@ -171,7 +173,7 @@ public class PackedBufferManagerTest {
 
     @Test
     public void setTest() {
-        StableShape shape = StableShape.withResetValue(5, oddReset);
+        StableShape shape = StableShape.withResetValue(testShape, oddReset);
         underTest = new AbstractBufferManager.Packed(shape);
         underTest.set(0);
         underTest.set(1);

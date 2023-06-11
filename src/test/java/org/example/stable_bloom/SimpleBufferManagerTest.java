@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.commons.collections4.bloomfilter.Shape;
 import org.junit.jupiter.api.Test;
 
 public class SimpleBufferManagerTest {
@@ -12,7 +13,7 @@ public class SimpleBufferManagerTest {
     private AbstractBufferManager underTest;
     
     // reset value of 128 ensures simple implementation
-    private StableShape shape = StableShape.withResetValue(5, 128);
+    private StableShape shape = StableShape.withResetValue(Shape.fromNP(5, 1.0/5), 128);
 
     @Test
     public void lengthTest() {
