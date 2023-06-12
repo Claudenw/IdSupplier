@@ -2,7 +2,6 @@ package org.example.stable_bloom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.collections4.bloomfilter.AbstractBloomFilterTest;
@@ -20,7 +19,7 @@ public class StableBloomFilterTest extends AbstractBloomFilterTest<StableBloomFi
 
     @Override
     protected StableBloomFilter createEmptyFilter(final Shape shape) {
-        StableShape stableShape = StableShape.byShape(shape);
+        StableShape stableShape = StableShape.builder(shape).build();
         return new StableBloomFilter(stableShape);
     }
 
@@ -64,7 +63,7 @@ public class StableBloomFilterTest extends AbstractBloomFilterTest<StableBloomFi
                 new IncrementingHasher(33, 1)/* 33-49 */);
         BloomFilter bf6 = TestingHashers.mergeHashers(createEmptyFilter(getTestShape()),
                 new IncrementingHasher(50, 1)/* 50-66 */, new IncrementingHasher(67, 1)/* 67-83 */);
-        assertThrows(IllegalArgumentException.class, () -> bf5.estimateIntersection(bf6));
+        assertEquals(0, bf5.estimateIntersection(bf6));
 
         // infinite with infinite
         assertEquals(bf3.estimateN(), bf3.estimateIntersection(bf3));

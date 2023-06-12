@@ -16,18 +16,16 @@
  */
 package org.example.stable_bloom;
 
-import org.apache.commons.collections4.bloomfilter.AbstractBitMapProducerTest;
 import org.apache.commons.collections4.bloomfilter.AbstractIndexProducerTest;
-import org.apache.commons.collections4.bloomfilter.BitMapProducer;
-import org.apache.commons.collections4.bloomfilter.Shape;
-import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.BloomFilter;
+import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.IncrementingHasher;
 import org.apache.commons.collections4.bloomfilter.IndexProducer;
+import org.apache.commons.collections4.bloomfilter.Shape;
 
 public class IndexProducerFromStableBloomFilterTest extends AbstractIndexProducerTest {
 
-    StableShape stableShape = StableShape.byShape(Shape.fromKM(17, 72));
+    StableShape stableShape = StableShape.builder(Shape.fromKM(17, 72)).build();
 
     @Override
     protected IndexProducer createProducer() {
@@ -50,6 +48,6 @@ public class IndexProducerFromStableBloomFilterTest extends AbstractIndexProduce
 
     @Override
     protected int[] getExpectedIndices() {
-        return new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ,13, 14, 15, 16};
+        return new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
     }
 }

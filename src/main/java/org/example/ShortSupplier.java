@@ -29,15 +29,17 @@ public class ShortSupplier {
 
     /**
      * 
-     * @param start integer value in the range [0x0, 0xFFFF) lowest value returned (inclusive).
-     * @param end integer in the range (start+1, 0xFFFF] highest value returned (exclusive)
+     * @param start integer value in the range [0x0, 0xFFFF) lowest value returned
+     * (inclusive).
+     * @param end integer in the range (start+1, 0xFFFF] highest value returned
+     * (exclusive)
      */
     public ShortSupplier(int start, int end) {
-        if (start < 0 || start > FILLER_LIMIT-1) {
-            throw new IllegalArgumentException( "start must be in the range [0x0, 0xFFFF)");
+        if (start < 0 || start > FILLER_LIMIT - 1) {
+            throw new IllegalArgumentException("start must be in the range [0x0, 0xFFFF)");
         }
-        if (end<=start || end > FILLER_LIMIT) {
-            throw new IllegalArgumentException( "start must be in the range (start+1, 0xFFFF]");
+        if (end <= start || end > FILLER_LIMIT) {
+            throw new IllegalArgumentException("start must be in the range (start+1, 0xFFFF]");
         }
         hasher = new Hasher();
         buffer = new short[end - start];
@@ -69,6 +71,7 @@ public class ShortSupplier {
 
     /**
      * Gets the next ID from the list.
+     * 
      * @return the next ID from the list.
      */
     public short nextId() {
@@ -78,16 +81,18 @@ public class ShortSupplier {
             resetBuffer();
         } else {
             int src = idx + 1;
-            if (src < buffer.length) { 
+            if (src < buffer.length) {
                 int len = buffer.length - src;
                 System.arraycopy(buffer, src, buffer, idx, len);
             }
         }
         return result;
     }
-    
+
     /**
-     * Returns true if no values have been returned yet or if the values have just been reset.
+     * Returns true if no values have been returned yet or if the values have just
+     * been reset.
+     * 
      * @return
      */
     public boolean atStart() {
@@ -117,7 +122,6 @@ public class ShortSupplier {
             return idx;
         }
     }
-    
 
     // test code
     public static void main(String[] args) {
@@ -125,7 +129,7 @@ public class ShortSupplier {
         int collisionCount = 0;
         ShortSupplier ss = new ShortSupplier();
         if (!ss.atStart()) {
-            System.err.println( "Not at start");
+            System.err.println("Not at start");
         }
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < FILLER_LIMIT; i++) {
@@ -134,40 +138,39 @@ public class ShortSupplier {
                     System.err.println("Collision at " + i + " value " + s);
                     collisionCount++;
                 }
-                if (ss.atStart() && i != FILLER_LIMIT-1) {
-                    System.err.println( "At start");
+                if (ss.atStart() && i != FILLER_LIMIT - 1) {
+                    System.err.println("At start");
                 }
             }
             System.out.println(collisionCount + " Collisions");
             set.clear();
         }
-        
+
         // test partial
-        System.out.println( "Starting partial test");
-        ss = new ShortSupplier( 0x0F, 0x5F );
+        System.out.println("Starting partial test");
+        ss = new ShortSupplier(0x0F, 0x5F);
         if (!ss.atStart()) {
-            System.err.println( "Not at start");
+            System.err.println("Not at start");
         }
         for (int j = 0; j < 3; j++) {
             for (int i = 0; i < ss.buffer.length; i++) {
                 Short s = ss.nextId();
-                if (s<0xF || 0x5F <= s) {
-                    System.err.println( "Invalid value: "+s);
+                if (s < 0xF || 0x5F <= s) {
+                    System.err.println("Invalid value: " + s);
                 }
                 if (!set.add(s)) {
                     System.err.println("Collision at " + i + " value " + s);
                     collisionCount++;
                 }
-                if (ss.atStart() && i != ss.buffer.length-1) {
-                    System.err.println( "At start");
+                if (ss.atStart() && i != ss.buffer.length - 1) {
+                    System.err.println("At start");
                 }
             }
             System.out.println(collisionCount + " Collisions");
             set.clear();
         }
-        
+
         System.out.println("DONE");
-        
-        
+
     }
 }

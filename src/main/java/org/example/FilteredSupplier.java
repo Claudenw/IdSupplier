@@ -12,25 +12,25 @@ public class FilteredSupplier {
     private StableBloomFilter stableBloomFilter;
     private ShortSupplier shortSupplier;
 
-    
     public FilteredSupplier() {
-        stableBloomFilter = new StableBloomFilter(StableShape.byShape(Shape.fromNP(IDHasherFactory.LIMIT, 1.0/IDHasherFactory.LIMIT)));
+        stableBloomFilter = new StableBloomFilter(
+                StableShape.builder(Shape.fromNP(IDHasherFactory.LIMIT, 1.0 / IDHasherFactory.LIMIT)).build());
         shortSupplier = new ShortSupplier();
     }
-    
+
     public short nextId() {
         short result;
         Hasher hasher;
         do {
             result = shortSupplier.nextId();
-            hasher = IDHasherFactory.get( result );            
+            hasher = IDHasherFactory.get(result);
         } while (stableBloomFilter.contains(hasher));
-        stableBloomFilter.merge( hasher );
+        stableBloomFilter.merge(hasher);
         return result;
     }
-    
-    public void saw( short result ) {
-        stableBloomFilter.merge(IDHasherFactory.get( result ));
+
+    public void saw(short result) {
+        stableBloomFilter.merge(IDHasherFactory.get(result));
     }
 
     public static void main(String[] args) {

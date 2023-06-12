@@ -3,7 +3,6 @@ package org.example.stable_bloom;
 import java.util.Arrays;
 import java.util.function.IntBinaryOperator;
 
-import org.apache.commons.collections4.bloomfilter.BitCountProducer.BitCountConsumer;
 import org.apache.commons.collections4.bloomfilter.BitMap;
 
 public abstract class AbstractBufferManager implements BufferManager {
@@ -20,10 +19,10 @@ public abstract class AbstractBufferManager implements BufferManager {
         this.shape = shape;
         this.buffer = new byte[buffSize];
     }
-    
+
     @Override
     public void clear() {
-        Arrays.fill(buffer, (byte)0);
+        Arrays.fill(buffer, (byte) 0);
     }
 
     protected byte asByte(int value) {
@@ -43,13 +42,14 @@ public abstract class AbstractBufferManager implements BufferManager {
         Simple(StableShape shape) {
             super(shape, shape.getNumberOfEntries());
         }
-        
+
+        @Override
         public Simple copy() {
             Simple result = new Simple(this.shape);
             System.arraycopy(this.buffer, 0, result.buffer, 0, result.buffer.length);
             return result;
         }
-        
+
         @Override
         public int get(int entry) {
             return asInt(buffer[entry]);
@@ -85,16 +85,17 @@ public abstract class AbstractBufferManager implements BufferManager {
         private final byte mask;
 
         Packed(StableShape shape) {
-            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0/ shape.cellsPerByte ));
+            super(shape, (int) Math.ceil(shape.getNumberOfEntries() * 1.0 / shape.cellsPerByte));
             this.mask = (byte) ((1 << shape.bitsPerCell) - 1);
         }
-        
+
+        @Override
         public Packed copy() {
             Packed result = new Packed(this.shape);
             System.arraycopy(this.buffer, 0, result.buffer, 0, result.buffer.length);
             return result;
         }
-        
+
         /**
          * Returns array of position and offset.
          * 
@@ -108,13 +109,13 @@ public abstract class AbstractBufferManager implements BufferManager {
         private int get(int[] location) {
             return asInt(((mask << location[OFFSET]) & buffer[location[POSITION]]) >> location[OFFSET]);
         }
-        
+
         @Override
         public int get(int entry) {
             return get(location(entry));
-            
+
         }
-        
+
         private void set(int[] location, int rawValue) {
             int value = rawValue << location[OFFSET];
             int reverseMask = ~(mask << location[OFFSET]);
@@ -128,7 +129,7 @@ public abstract class AbstractBufferManager implements BufferManager {
 
         @Override
         public void decrement(int entry) {
-            func( entry, 1, (x,y) -> x>0?x-y:0);
+            func(entry, 1, (x, y) -> x > 0 ? x - y : 0);
         }
 
         @Override
@@ -136,11 +137,11 @@ public abstract class AbstractBufferManager implements BufferManager {
             int[] location = location(entry);
             return (buffer[location[POSITION]] & (mask << location[OFFSET])) != 0;
         }
-        
+
         @Override
         public void func(int entry, int value, IntBinaryOperator f) {
             int[] location = location(entry);
-            set( location, f.applyAsInt(get(location), value));
+            set(location, f.applyAsInt(get(location), value));
         }
     }
 

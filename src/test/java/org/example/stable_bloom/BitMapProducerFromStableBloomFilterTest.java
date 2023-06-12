@@ -18,14 +18,13 @@ package org.example.stable_bloom;
 
 import org.apache.commons.collections4.bloomfilter.AbstractBitMapProducerTest;
 import org.apache.commons.collections4.bloomfilter.BitMapProducer;
-import org.apache.commons.collections4.bloomfilter.Shape;
-import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.BloomFilter;
+import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.IncrementingHasher;
 
 public class BitMapProducerFromStableBloomFilterTest extends AbstractBitMapProducerTest {
 
-    StableShape stableShape = StableShape.byShape(Shape.fromPMK(0.05, 72, 17));
+    StableShape stableShape = StableShape.builder().setM(72).setK(17).setMax(3).build();
 
     @Override
     protected BitMapProducer createProducer() {

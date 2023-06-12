@@ -4,11 +4,9 @@ import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
 
-import org.apache.commons.collections4.bloomfilter.BitCountProducer;
 import org.apache.commons.collections4.bloomfilter.BitMap;
 import org.apache.commons.collections4.bloomfilter.BitMapProducer;
 import org.apache.commons.collections4.bloomfilter.BloomFilter;
-import org.apache.commons.collections4.bloomfilter.CountingBloomFilter;
 import org.apache.commons.collections4.bloomfilter.Hasher;
 import org.apache.commons.collections4.bloomfilter.IndexProducer;
 import org.apache.commons.collections4.bloomfilter.Shape;
